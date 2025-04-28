@@ -31,9 +31,10 @@ generation_kwargs:
     - "</s>"
     - "<|im_end|>"
     - "<|eot_id|>"
-  do_sample: false
-  max_gen_toks: 8192
-  temperature: 0.0
+  do_sample: true
+  max_gen_toks: 32768
+  temperature: 0.6
+  top_p: 0.95
 repeats: 1
 filter_list:
   - name: "strict-match"
