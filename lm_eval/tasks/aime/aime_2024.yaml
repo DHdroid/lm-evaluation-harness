@@ -1,0 +1,51 @@
+tag:
+  - math_word_problems
+task: aime_2024
+dataset_path: Maxwell-Jia/AIME_2024
+# dataset_name: null
+output_type: generate_until
+training_split: train
+fewshot_split: train
+test_split: train
+doc_to_text: |
+  A conversation between User and Assistant. The user asks a question, and the Assistant solves it.
+  The assistant first thinks about the reasoning process in the mind and then provides the user
+  with the answer. The reasoning process and answer are enclosed within <think> </think> and
+  <answer> </answer> tags, respectively, i.e., <think> reasoning process here </think>
+  <answer> answer here </answer>. User: {{Problem}} Please reason step by step, and put your final answer within \boxed{}. Assistant: <think>\n
+doc_to_target: "{{Answer}}" # "{{Answer.split('### ')[-1].rstrip()}}"
+metric_list:
+  - metric: exact_match
+    aggregation: mean
+    higher_is_better: true
+    ignore_case: true
+    ignore_punctuation: false
+    regexes_to_ignore:
+      - ","
+      - "\\$"
+      - "(?s).*#### "
+      - "\\.$"
+generation_kwargs:
+  until:
+    - "</answer>"
+    - "</s>"
+    - "<|im_end|>"
+    - "<|eot_id|>"
+  do_sample: false
+  max_gen_toks: 8192
+  temperature: 0.0
+repeats: 1
+filter_list:
+  - name: "strict-match"
+    filter:
+      - function: "regex"
+        regex_pattern: "\\\\boxed\\{\\s*(-?[0-9\\.\\,]+)\\s*\\}"
+      - function: "take_first"
+  - name: "flexible-extract"
+    filter:
+      - function: "regex"
+        group_select: -1
+        regex_pattern: "(-?[$0-9.,]{2,})|(-?[0-9]+)"
+      - function: "take_first"
+metadata:
+  version: 0.0
